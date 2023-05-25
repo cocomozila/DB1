@@ -13,7 +13,6 @@ import java.util.NoSuchElementException;
  */
 
 @Slf4j
-@Repository
 public class MemberRepositoryV0 {
 
     public Member save(Member member) throws SQLException {

@@ -1,26 +1,27 @@
 package hello.jdbc.repository;
 
-import hello.jdbc.connection.DBConnectionUtil;
 import hello.jdbc.domain.Member;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.NoSuchElementException;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
- *  JDBC - DataSource 사용, JdbcUtils 사용
+ *  트랜잭션 - 트랜잭션 매니저
+ *  DataSourceUtils.getConnection()
+ *  DataSourceUtils.releaseConnection()
  */
 
 @Slf4j
-public class MemberRepositoryV1 {
+public class MemberRepositoryV3 {
 
     private final DataSource dataSource;
 
-    public MemberRepositoryV1(DataSource dataSource) {
+    public MemberRepositoryV3(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
@@ -123,11 +124,13 @@ public class MemberRepositoryV1 {
     private void close(Connection con, Statement stmt, ResultSet rs) {
         JdbcUtils.closeResultSet(rs);
         JdbcUtils.closeStatement(stmt);
-        JdbcUtils.closeConnection(con);
+        // 주의! 트랜재견 동기화를 사용하려면 DataSourceUtils를 사용해야 한다.
+        DataSourceUtils.releaseConnection(con, dataSource);
     }
 
     private Connection getConnection() throws SQLException {
-        Connection con = dataSource.getConnection();
+        // 주의! 트랜잭션 동기화를 사용하려면 DataSourceUtils를 사용해야 한다.
+        Connection con = DataSourceUtils.getConnection(dataSource);
         log.info("get connection={}, class={}", con, con.getClass());
         return con;
     }
